@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: 2010-09-09
+# Create EC2 in private subnet.
+
+Resources:
+  # We need a SG for the instance.
+  PrivateHostSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue app-network-VPC
+      GroupDescription: SG for private EC2 instance
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-PrivateSG
+
+  # Creating IAM role that allows us to connect through SSM.
+  # With this we avoid creating another instance as a bastion host.
+  HostRoleForSSM:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-EC2-AmazonSSMManagedInstanceCore
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  HostInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref HostRoleForSSM
+      InstanceProfileName: !Sub ${AWS::StackName}-HostInstanceProfile
+
+  # Create an amazon linux 2 EC2 private instance.
+  # Note the use of the Key-Pair, that needs to be created before this stack.
+  PrivateHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0be2609ba883822ec
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref HostInstanceProfile
+      SubnetId: !ImportValue app-network-PrivateSubnetA
+      SecurityGroupIds:
+        - !Ref PrivateHostSecurityGroup
+      KeyName: app-private-host-keypair
+      UserData:
+        !Base64 |
+          #!/bin/bash
+          yum -y update
+          yum -y install mariadb
+          yum -y install java-1.8.0-openjdk
+          yum -y install python3
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-PrivateHost
+
+Outputs:
+  PrivateHostSG:
+    Description: PrivateHostSG
+    Value:
+      Ref: PrivateHostSecurityGroup
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-PrivateHostSG"
+  PrivateHost:
+    Description: PrivateHost
+    Value:
+      Ref: PrivateHost

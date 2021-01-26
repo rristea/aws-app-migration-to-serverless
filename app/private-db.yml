@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  # The DB SG accepts incomming connections only from the DB associated with the private Host.
+  PrivateDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !ImportValue app-network-VPC
+      GroupDescription: SG for private DB instances
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !ImportValue app-private-host-PrivateHostSG
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-DBSG
+
+  # The DB is added to the private subnets. It needs at least two.
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: description
+      SubnetIds:
+        - !ImportValue app-network-PrivateSubnetA
+        - !ImportValue app-network-PrivateSubnetB
+
+  # Create Aurora serverless with MySQL compatibility
+  ServerlessDB:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: Delete
+    Properties:
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref PrivateDBSecurityGroup
+      MasterUsername: admin
+      MasterUserPassword: administrator
+      #DBClusterIdentifier: app-private-db-cluster
+      Engine: aurora
+      EngineVersion: 5.6.10a
+      EngineMode: serverless
+      ScalingConfiguration:
+        AutoPause: true
+        MinCapacity: 1
+        MaxCapacity: 1
+        SecondsUntilAutoPause: 1000
+
+Outputs:
+  PrivateServerlessDB:
+    Description: PrivateServerlessDB
+    Value: !GetAtt ServerlessDB.Endpoint.Address
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-ServerlessDB"
