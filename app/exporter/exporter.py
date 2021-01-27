@@ -29,7 +29,7 @@ logging.info(f"connecting to: {cfg.db_host}")
 mydb = mysql.connector.connect(
     host=cfg.db_host,
     user=cfg.db_user,
-    password=cfg.db_passwod,
+    password=cfg.db_password,
     database=cfg.db_database
 )
 execute_sql(f"INSERT INTO exporter (data) VALUES (\"{datetime}\")", mydb)

@@ -30,7 +30,6 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:PutObject
-                # Resource: !Join ['', ['arn:aws:s3:::', !Ref AWS::AccountId, '-', !ImportValue app-serverless-s3-bucket, '/*']]
                 Resource: !Join ['', ['arn:aws:s3:::', !ImportValue app-serverless-s3-bucket, '/*']]
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
