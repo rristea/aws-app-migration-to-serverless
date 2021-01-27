@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowReadSecret
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:DescribeSecret
+                Resource: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:app-serverless-secret-private-db-??????
+        - PolicyName: AllowUploadArtifacts
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                # Resource: !Join ['', ['arn:aws:s3:::', !Ref AWS::AccountId, '-', !ImportValue app-serverless-s3-bucket, '/*']]
+                Resource: !Join ['', ['arn:aws:s3:::', !ImportValue app-serverless-s3-bucket, '/*']]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}
+      Environment:
+        Variables:
+          BUCKET: !ImportValue app-serverless-s3-bucket
+      Code:
+        S3Bucket: !ImportValue app-serverless-s3-bucket
+        S3Key: retriever-1.0-SNAPSHOT.jar
+      Handler: Retriever::handleRequest
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: java8
+      MemorySize: 256
+      Timeout: 60
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue app-private-host-PrivateHostSG
+        SubnetIds:
+          - !ImportValue app-network-PrivateSubnetA
