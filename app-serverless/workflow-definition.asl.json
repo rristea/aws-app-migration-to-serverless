@@ -1,0 +1,16 @@
+{
+  "Comment": "Serverless Application Workflow",
+  "StartAt": "Retriever",
+  "States": {
+    "Retriever": {
+      "Type": "Task",
+      "Resource": "${RetrieverFunction}",
+      "Next": "Exporter"
+    },
+    "Exporter": {
+      "Type": "Task",
+      "Resource": "${ExporterFunction}",
+      "End": true
+    }
+  }
+}
