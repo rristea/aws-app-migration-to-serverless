@@ -1,0 +1,14 @@
+<Configuration status="WARN">
+    <Appenders>
+        <File name="File" fileName="retriever.log">
+            <PatternLayout>
+                <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+            </PatternLayout>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
