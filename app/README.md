@@ -90,11 +90,17 @@ The java application is structured as follows:
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         [...]
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            </configuration>
+        [...]
       </plugin>
 
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        [...]
+              <classpathPrefix>lib/</classpathPrefix>
         [...]
       </plugin>
   ```
