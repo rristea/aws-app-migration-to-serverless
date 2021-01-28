@@ -1,0 +1,1 @@
+![Application](../resources/diagrams-app-serverless.png)
