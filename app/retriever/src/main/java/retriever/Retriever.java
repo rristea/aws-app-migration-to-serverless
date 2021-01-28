@@ -34,7 +34,7 @@ public class Retriever {
             String insert = "insert into retriever (data) values (\"" + datetimeObject + "\");";
             sql.execute(insert);
 
-            FileHelper.write(currentTime);
+            FileHelper.write(currentTime, prop.getProperty("data.file"));
         } catch (IOException ex) {
             logger.error("Error reading properties file.");
         }
