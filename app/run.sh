@@ -1,4 +1,4 @@
 #!/bin/bash
 
-java -jar retriever.jar
+java -jar retriever-1.0-SNAPSHOT.jar
 python3 exporter.py

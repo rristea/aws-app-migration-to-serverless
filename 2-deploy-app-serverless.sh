@@ -11,6 +11,7 @@ echo "Deploy DB secret"
 
 echo "Build Retriever"
 # Build the Retriever, and replace the host DB in the properties files.
+mvn clean -f app-serverless/retriever/pom.xml
 mvn package resources:resources -DDB_HOST="${DB_HOST}" -f app-serverless/retriever/pom.xml
 
 echo "Copy Retriever to S3"

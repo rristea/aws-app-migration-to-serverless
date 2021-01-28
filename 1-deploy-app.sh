@@ -22,6 +22,7 @@ echo "Create app directory on host"
 
 echo "Build Retriever"
 # Build the Retriever, and replace the host DB in the properties files.
+mvn clean -f app/retriever/pom.xml
 mvn package resources:resources -DDB_HOST="${DB_HOST}" -f app/retriever/pom.xml
 
 echo "Setup Retriever on Host"
