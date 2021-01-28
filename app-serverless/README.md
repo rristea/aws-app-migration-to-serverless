@@ -170,6 +170,18 @@ In order to migrate the Retriever application to a Serverless architecture, the 
   +  else:
   +      return json.loads(get_secret_value_response['SecretString'])
   ```
+  * In `exporter.py`
+  ```diff
+  +creds = cfg.get_credentials()
+  mydb = mysql.connector.connect(
+      host=cfg.db_host,
+  -    user=cfg.db_user,
+  -    password=cfg.db_password,
+  +    user=creds['username'],
+  +    password=creds['password'],
+      database=cfg.db_database
+  )
+  ```
 * For packaging the application we need to create a `.zip` with the scripts and all the dependencies.
   * Bash commands for creating the `.zip`
   ```bash
