@@ -55,3 +55,40 @@ In order to migrate the Retriever application to a Serverless architecture, the 
       </Loggers>
   </Configuration>
   ```
+* For using DB credentials from SecretsManager, AWS has created a library that does this without requiring any code change. Only config changes needed.
+  * In `pom.xml`
+  ```xml
+    <dependency>
+      <groupId>com.amazonaws.secretsmanager</groupId>
+      <artifactId>aws-secretsmanager-jdbc</artifactId>
+    </dependency>
+  ```
+  * In `retriever.properties`
+  ```diff
+  -db.driver=com.mysql.cj.jdbc.Driver
+  -db.url=jdbc:mysql://${DB_HOST}/app
+  -db.user=admin
+  -db.password=administrator
+  +db.driver=com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver
+  +db.url=jdbc-secretsmanager:mysql://${DB_HOST}/app
+  +db.user=app-serverless-secret-private-db
+  +db.password=placeholder
+  ```
+* For uploading the `time.json` file to S3, we first need to change the directory where teh file is generated. In Lambda, you only have write access to the `/tmp` folder. Then add the `aws-java-sdk-s3` dependency for SDKv1 (there is also a SDKv2 for Java but at the moment it has no support for uploading to encripted buckets). Finally we need to add the code for uploading the file, but there are a lot of examples in the AWS developer guide.
+  * In `retriever.properties`
+  ```diff
+  -data.file=time.json
+  +data.file=/tmp/time.json
+  ```
+  * In `pom.xml`
+  ```xml
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+      <version>1.11.880</version>
+    </dependency>
+  ```
+  * For the code see `S3Upload.java`
+* For packaging the application we'll use the `maven-shade-plugin` that will grate a fat JAR containing all the dependencies.
+  ```diff
+  ```
