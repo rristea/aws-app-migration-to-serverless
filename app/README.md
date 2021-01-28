@@ -36,3 +36,65 @@ The java application is structured as follows:
     stmt = conn.createStatement();
     stmt.executeUpdate(sql);
   ```
+* For logging it is used log4j2:
+  * In `pom.xml`:
+  ```xml
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+    </dependency>
+  ```
+  * In `log4j2.xml`
+  ```xml
+  <Configuration status="WARN">
+      <Appenders>
+          <File name="File" fileName="retriever.log">
+              <PatternLayout>
+                  <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+              </PatternLayout>
+          </File>
+      </Appenders>
+      <Loggers>
+          <Root level="INFO">
+              <AppenderRef ref="File"/>
+          </Root>
+      </Loggers>
+  </Configuration>
+  ```
+  * In `Retriever.java`:
+  ```
+  import org.slf4j.Logger;
+  import org.slf4j.LoggerFactory;
+
+  public class Retriever {
+      private static final Logger logger = LoggerFactory.getLogger(Retriever.class);
+
+      public static void main(String[] args) {
+          logger.info("##### Starting retriever #####");
+          //...
+      }
+  }
+  ```
+* For packaging it is used `maven-jar-plugin` (to create the jar file) and `maven-dependency-plugin` to add it's dependen in a `lib` folder that will be deployed along with the jar.
+  * In `pom.xml`
+  ```xml
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        [...]
+      </plugin>
+
+     <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        [...]
+      </plugin>
+  ```
