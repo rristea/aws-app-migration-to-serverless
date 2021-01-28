@@ -91,4 +91,20 @@ In order to migrate the Retriever application to a Serverless architecture, the 
   * For the code see `S3Upload.java`
 * For packaging the application we'll use the `maven-shade-plugin` that will grate a fat JAR containing all the dependencies.
   ```diff
+  -    <plugin>
+  -      <groupId>org.apache.maven.plugins</groupId>
+  -      <artifactId>maven-dependency-plugin</artifactId>
+  -      [...]
+  -    </plugin>
+  -
+  -   <plugin>
+  -      <groupId>org.apache.maven.plugins</groupId>
+  -      <artifactId>maven-jar-plugin</artifactId>
+  -      [...]
+  -    </plugin>
+  +    <plugin>
+  +      <groupId>org.apache.maven.plugins</groupId>
+  +      <artifactId>maven-shade-plugin</artifactId>
+  +      [...]
+  +    </plugin>
   ```
