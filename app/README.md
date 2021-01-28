@@ -104,3 +104,52 @@ The java application is structured as follows:
         [...]
       </plugin>
   ```
+  
+  
+## Exporter
+  
+Python application that does the following:
+1. Retrieves the time data from `time.json`.
+2. Extracts the `"datetime"` from the JSON and inserts it in the DB table `exporter`.
+
+The python application is structured as follows:
+* Application config is done through a `exporterconfig.py` module:
+```py
+db_host = "{{DB_HOST}}"
+db_user = "admin"
+db_password = "administrator"
+db_database = "app"
+
+data_file = "time.json"
+```
+* For DB connectivity and operations we use `mysql-connector-python` package.
+  * In `requirements.txt`
+  ```
+  mysql-connector-python
+  ```
+  * In `exporter.py`
+  ```py
+  import mysql.connector
+  import exporterconfig as cfg
+  [...]
+  db = mysql.connector.connect(
+      host=cfg.db_host,
+      user=cfg.db_user,
+      password=cfg.db_password,
+      database=cfg.db_database
+  )
+  mycursor = db.cursor()
+  mycursor.execute(sql)
+  db.commit()
+  ```
+* For logging we use the `logging` package.
+  * In `exporter.py`
+  ```py
+  import logging
+  logging.basicConfig(level=logging.DEBUG,
+                      filename='exporter.log',
+                      format='%(asctime)s %(levelname)s %(message)s')
+  [...]
+  logging.info("##### Starting exporter #####")
+  ```
+* For packaging there is nothing special done. The scripts are deployed on the host and the dependencies installed with `pip install -r requirements.txt`.
